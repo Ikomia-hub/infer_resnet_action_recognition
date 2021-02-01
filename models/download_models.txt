@@ -1,0 +1,5 @@
+https://www.dropbox.com/s/065l4vr8bptzohb/resnet-34_kinetics.onnx?dl=1
+https://drive.google.com/open?id=1g8DLaeeTq3RI62XtQaYBUpiN_LUgW2xA
+https://drive.google.com/open?id=1QVZQdwCJAETQ1aB4ZzAKT33HwTTWlB2M
+https://drive.google.com/open?id=1dQPmsZ0ljgCKtSesRZhHv4EYpVaknQNY
+https://drive.google.com/open?id=1_dVnVnIfB3OJAmxr9rdVWfojdMSBdMr8
