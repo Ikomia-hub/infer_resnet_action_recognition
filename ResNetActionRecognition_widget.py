@@ -1,10 +1,10 @@
 from ikomia import utils, core, dataprocess
-import ResNetActionRecognition_process as processMod
+from ikomia.utils import qtconversion
+from ResNetActionRecognition.ResNetActionRecognition_process import ResNetActionRecognitionParam
 import cv2
 import os
 import glob
-
-#PyQt GUI framework
+# PyQt GUI framework
 from PyQt5.QtWidgets import *
 
 backend_names = {
@@ -40,13 +40,13 @@ backend_targets = {
 # - Class which implements widget associated with the process
 # - Inherits core.CProtocolTaskWidget from Ikomia API
 # --------------------
-class ResNetActionRecognitionWidget(core.CProtocolTaskWidget):
+class ResNetActionRecognitionWidget(core.CWorkflowTaskWidget):
 
     def __init__(self, param, parent):
-        core.CProtocolTaskWidget.__init__(self, parent)
+        core.CWorkflowTaskWidget.__init__(self, parent)
 
         if param is None:
-            self.param = processMod.ResNetActionRecognitionParam()
+            self.param = ResNetActionRecognitionParam()
         else:
             self.param = param
 
@@ -99,7 +99,7 @@ class ResNetActionRecognitionWidget(core.CProtocolTaskWidget):
         self.grid_layout.addWidget(self.check_rolling, 4, 0, 1, 2)
 
         # PyQt -> Qt wrapping
-        layoutPtr = utils.PyQtToQt(self.grid_layout)
+        layoutPtr = qtconversion.PyQtToQt(self.grid_layout)
 
         # Set widget layout
         self.setLayout(layoutPtr)
@@ -146,10 +146,10 @@ class ResNetActionRecognitionWidget(core.CProtocolTaskWidget):
         self.emitApply(self.param)
 
 
-#--------------------
-#- Factory class to build process widget object
-#- Inherits dataprocess.CWidgetFactory from Ikomia API
-#--------------------
+# --------------------
+# - Factory class to build process widget object
+# - Inherits dataprocess.CWidgetFactory from Ikomia API
+# --------------------
 class ResNetActionRecognitionWidgetFactory(dataprocess.CWidgetFactory):
 
     def __init__(self):

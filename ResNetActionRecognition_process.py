@@ -1,6 +1,5 @@
 from ikomia import core, dataprocess
 import copy
-# Your imports below
 import os
 import cv2
 import imutils
@@ -9,14 +8,15 @@ from collections import deque
 
 SAMPLE_SIZE = 112
 
+
 # --------------------
 # - Class to handle the process parameters
 # - Inherits core.CProtocolTaskParam from Ikomia API
 # --------------------
-class ResNetActionRecognitionParam(core.CProtocolTaskParam):
+class ResNetActionRecognitionParam(core.CWorkflowTaskParam):
 
     def __init__(self):
-        core.CProtocolTaskParam.__init__(self)
+        core.CWorkflowTaskParam.__init__(self)
         # Place default value initialization here
         self.rolling = True
         self.sample_duration = 16
@@ -25,30 +25,29 @@ class ResNetActionRecognitionParam(core.CProtocolTaskParam):
         self.backend = cv2.dnn.DNN_BACKEND_DEFAULT
         self.target = cv2.dnn.DNN_TARGET_CPU
 
-    def setParamMap(self, paramMap):
+    def setParamMap(self, param_map):
         # Set parameters values from Ikomia application
         # Parameters values are stored as string and accessible like a python dict
-        self.rolling = bool(paramMap["rolling"])
-        self.sample_duration = int(paramMap["sample_duration"])
-        pass
+        self.rolling = bool(param_map["rolling"])
+        self.sample_duration = int(param_map["sample_duration"])
 
     def getParamMap(self):
         # Send parameters values to Ikomia application
         # Create the specific dict structure (string container)
-        paramMap = core.ParamMap()
-        paramMap["rolling"] = str(self.rolling)
-        paramMap["sample_duration"] = str(self.sample_duration)
-        return paramMap
+        param_map = core.ParamMap()
+        param_map["rolling"] = str(self.rolling)
+        param_map["sample_duration"] = str(self.sample_duration)
+        return param_map
 
 
 # --------------------
 # - Class which implements the process
 # - Inherits core.CProtocolTask or derived from Ikomia API
 # --------------------
-class ResNetActionRecognitionProcess(dataprocess.CVideoProcess):
+class ResNetActionRecognitionProcess(dataprocess.CVideoTask):
 
     def __init__(self, name, param):
-        dataprocess.CVideoProcess.__init__(self, name)
+        dataprocess.CVideoTask.__init__(self, name)
         self.net = None
         self.last_label = ""
         self.class_names = []
@@ -72,7 +71,7 @@ class ResNetActionRecognitionProcess(dataprocess.CVideoProcess):
         return 1
 
     def globalInputChanged(self, new_sequence):
-        if new_sequence == True:
+        if new_sequence:
             self.frames = None
             self.last_label = ""
 
@@ -89,7 +88,7 @@ class ResNetActionRecognitionProcess(dataprocess.CVideoProcess):
         param = self.getParam()
 
         if self.frames is None:
-            if param.rolling == True:
+            if param.rolling:
                 self.frames = deque(maxlen=param.sample_duration)
             else:
                 self.frames = []
@@ -124,7 +123,7 @@ class ResNetActionRecognitionProcess(dataprocess.CVideoProcess):
             else:
                 self.last_label = ""
 
-            if param.rolling == False:
+            if not param.rolling:
                 self.frames = []
 
         # Get output :
@@ -150,10 +149,10 @@ class ResNetActionRecognitionProcess(dataprocess.CVideoProcess):
 # - Factory class to build process object
 # - Inherits dataprocess.CProcessFactory from Ikomia API
 # --------------------
-class ResNetActionRecognitionProcessFactory(dataprocess.CProcessFactory):
+class ResNetActionRecognitionProcessFactory(dataprocess.CTaskFactory):
 
     def __init__(self):
-        dataprocess.CProcessFactory.__init__(self)
+        dataprocess.CTaskFactory.__init__(self)
         # Set process information as string here
         self.info.name = "ResNet Action Recognition"
         self.info.shortDescription = "Human action recognition with spatio-temporal 3D CNNs."

@@ -1,6 +1,4 @@
 from ikomia import dataprocess
-import ResNetActionRecognition_process as processMod
-import ResNetActionRecognition_widget as widgetMod
 
 
 # --------------------
@@ -13,9 +11,11 @@ class ResNetActionRecognition(dataprocess.CPluginProcessInterface):
         dataprocess.CPluginProcessInterface.__init__(self)
 
     def getProcessFactory(self):
+        from ResNetActionRecognition.ResNetActionRecognition_process import ResNetActionRecognitionProcessFactory
         # Instantiate process object
-        return processMod.ResNetActionRecognitionProcessFactory()
+        return ResNetActionRecognitionProcessFactory()
 
     def getWidgetFactory(self):
+        from ResNetActionRecognition.ResNetActionRecognition_widget import ResNetActionRecognitionWidgetFactory
         # Instantiate associated widget object
-        return widgetMod.ResNetActionRecognitionWidgetFactory()
+        return ResNetActionRecognitionWidgetFactory()
