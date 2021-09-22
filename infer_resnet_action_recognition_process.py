@@ -44,7 +44,7 @@ class ResNetActionRecognitionParam(core.CWorkflowTaskParam):
 # - Class which implements the process
 # - Inherits core.CProtocolTask or derived from Ikomia API
 # --------------------
-class ResNetActionRecognitionProcess(dataprocess.CVideoTask):
+class ResNetActionRecognition(dataprocess.CVideoTask):
 
     def __init__(self, name, param):
         dataprocess.CVideoTask.__init__(self, name)
@@ -149,12 +149,12 @@ class ResNetActionRecognitionProcess(dataprocess.CVideoTask):
 # - Factory class to build process object
 # - Inherits dataprocess.CProcessFactory from Ikomia API
 # --------------------
-class ResNetActionRecognitionProcessFactory(dataprocess.CTaskFactory):
+class ResNetActionRecognitionFactory(dataprocess.CTaskFactory):
 
     def __init__(self):
         dataprocess.CTaskFactory.__init__(self)
         # Set process information as string here
-        self.info.name = "ResNet Action Recognition"
+        self.info.name = "infer_resnet_action_recognition"
         self.info.shortDescription = "Human action recognition with spatio-temporal 3D CNNs."
         self.info.description = "The purpose of this study is to determine whether current video datasets have sufficient data " \
                                 "for training very deep convolutional neural networks (CNNs) with spatio-temporalthree-dimensional " \
@@ -186,6 +186,6 @@ class ResNetActionRecognitionProcessFactory(dataprocess.CTaskFactory):
 
     def create(self, param=None):
         # Create process object
-        return ResNetActionRecognitionProcess(self.info.name, param)
+        return ResNetActionRecognition(self.info.name, param)
 
 

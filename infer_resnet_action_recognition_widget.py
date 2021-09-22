@@ -1,6 +1,6 @@
 from ikomia import utils, core, dataprocess
 from ikomia.utils import qtconversion
-from ResNetActionRecognition.ResNetActionRecognition_process import ResNetActionRecognitionParam
+from infer_resnet_action_recognition.infer_resnet_action_recognition_process import ResNetActionRecognitionParam
 import cv2
 import os
 import glob
@@ -155,7 +155,7 @@ class ResNetActionRecognitionWidgetFactory(dataprocess.CWidgetFactory):
     def __init__(self):
         dataprocess.CWidgetFactory.__init__(self)
         # Set the name of the process -> it must be the same as the one declared in the process factory class
-        self.name = "ResNet Action Recognition"
+        self.name = "infer_resnet_action_recognition"
 
     def create(self, param):
         # Create widget object
