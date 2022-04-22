@@ -65,7 +65,7 @@ class ResNetActionRecognition(dataprocess.CVideoTask):
             for row in f:
                 self.class_names.append(row[:-1])
 
-    def getProgressSteps(self, eltCount=1):
+    def getProgressSteps(self):
         # Function returning the number of progress steps for this process
         # This is handled by the main progress bar of Ikomia application
         return 1
