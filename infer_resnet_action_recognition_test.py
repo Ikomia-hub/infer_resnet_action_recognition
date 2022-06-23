@@ -14,5 +14,5 @@ def test(t, data_dict):
     input_img_0 = t.getInput(0)
     input_img_0.setImage(img)
     params = task.get_parameters(t)
-    params["model_name"] = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "resnet-34_kinetics.onnx")
+    params["model_name"] = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "resnet-101_kinetics.onnx")
     return run_for_test(t)
