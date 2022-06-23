@@ -33,6 +33,7 @@ class ResNetActionRecognitionParam(core.CWorkflowTaskParam):
         self.update = True
         self.backend = int(param_map["backend"])
         self.target = int(param_map["target"])
+        self.model_path = param_map["model_path"]
 
     def getParamMap(self):
         # Send parameters values to Ikomia application
@@ -42,6 +43,7 @@ class ResNetActionRecognitionParam(core.CWorkflowTaskParam):
         param_map["sample_duration"] = str(self.sample_duration)
         param_map["backend"] = str(self.backend)
         param_map["target"] = str(self.target)
+        param_map["model_path"] = self.model_path
         return param_map
 
 
