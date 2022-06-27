@@ -30,6 +30,7 @@ class ResNetActionRecognitionParam(core.CWorkflowTaskParam):
         # Parameters values are stored as string and accessible like a python dict
         self.rolling = bool(param_map["rolling"])
         self.sample_duration = int(param_map["sample_duration"])
+        self.model_path = param_map["model_path"]
         self.update = True
         self.backend = int(param_map["backend"])
         self.target = int(param_map["target"])
@@ -42,6 +43,7 @@ class ResNetActionRecognitionParam(core.CWorkflowTaskParam):
         param_map["sample_duration"] = str(self.sample_duration)
         param_map["backend"] = str(self.backend)
         param_map["target"] = str(self.target)
+        param_map["model_path"] = self.model_path
         return param_map
 
 
@@ -178,7 +180,7 @@ class ResNetActionRecognitionFactory(dataprocess.CTaskFactory):
                                 "models used in this study are publicly available."
         # relative path -> as displayed in Ikomia application process tree
         self.info.path = "Plugins/Python/Classification"
-        self.info.version = "1.0.2"
+        self.info.version = "1.0.3"
         self.info.iconPath = "icon/icon.png"
         self.info.authors = "Kensho Hara, Hirokatsu Kataoka, Yutaka Satoh"
         self.info.article = "Can Spatiotemporal 3D CNNs Retrace the History of 2D CNNs and ImageNet?"
