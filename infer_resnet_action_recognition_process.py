@@ -1,4 +1,4 @@
-from ikomia import core, dataprocess
+from ikomia import utils, core, dataprocess
 import copy
 import os
 import cv2
@@ -102,7 +102,12 @@ class ResNetActionRecognition(dataprocess.CVideoTask):
                 self.frames = []
 
         # Load the recognition model from disk
-        if self.net is None or param.update == True:
+        if self.net is None or param.update:
+            if not os.path.exists(param.model_path):
+                print("Downloading model, please wait...")
+                model_url = utils.getModelHubUrl() + "/" + self.name + "/" + os.path.basename(param.model_path)
+                self.download(model_url, param.model_path)
+
             self.net = cv2.dnn.readNet(param.model_path)
             self.net.setPreferableBackend(param.backend)
             self.net.setPreferableTarget(param.target)
@@ -181,7 +186,7 @@ class ResNetActionRecognitionFactory(dataprocess.CTaskFactory):
                                 "models used in this study are publicly available."
         # relative path -> as displayed in Ikomia application process tree
         self.info.path = "Plugins/Python/Classification"
-        self.info.version = "1.0.3"
+        self.info.version = "1.1.0"
         self.info.iconPath = "icon/icon.png"
         self.info.authors = "Kensho Hara, Hirokatsu Kataoka, Yutaka Satoh"
         self.info.article = "Can Spatiotemporal 3D CNNs Retrace the History of 2D CNNs and ImageNet?"

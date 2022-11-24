@@ -1,9 +1,8 @@
-from ikomia import utils, core, dataprocess
+from ikomia import core, dataprocess
 from ikomia.utils import qtconversion
 from infer_resnet_action_recognition.infer_resnet_action_recognition_process import ResNetActionRecognitionParam
 import cv2
 import os
-import glob
 # PyQt GUI framework
 from PyQt5.QtWidgets import *
 
@@ -35,6 +34,15 @@ backend_targets = {
     cv2.dnn.DNN_BACKEND_VKCOM: [cv2.dnn.DNN_TARGET_CPU],
     cv2.dnn.DNN_BACKEND_CUDA: [cv2.dnn.DNN_TARGET_CUDA, cv2.dnn.DNN_TARGET_CUDA_FP16],
 }
+
+_models = {
+    "ResNet34-Kinetics": "resnet-34-kinetics.onnx",
+    "ResNet50-Kinetics": "resnet-50-kinetics.onnx",
+    "ResNet101-Kinetics": "resnet-101-kinetics.onnx",
+    "ResNext101-Kinetics": "resnext-101-kinetics.onnx",
+    "WideResNet50-Kinetics": "wideresnet-50-kinetics.onnx",
+}
+
 
 # --------------------
 # - Class which implements widget associated with the process
@@ -107,10 +115,9 @@ class ResNetActionRecognitionWidget(core.CWorkflowTaskWidget):
     def fill_combo_models(self):
         self.combo_models.clear()
         models_folder = os.path.dirname(os.path.realpath(__file__)) + "/models"
-        model_files = glob.glob(models_folder + "/*.onnx")
 
-        for f in model_files:
-            self.combo_models.addItem(os.path.basename(f), f)
+        for model_name in _models:
+            self.combo_models.addItem(model_name, os.path.join(models_folder, _models[model_name]))
 
     def fill_combo_backend(self):
         self.combo_backend.clear()
