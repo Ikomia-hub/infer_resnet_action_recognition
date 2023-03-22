@@ -110,7 +110,7 @@ class ResNetActionRecognitionWidget(core.CWorkflowTaskWidget):
         layoutPtr = qtconversion.PyQtToQt(self.grid_layout)
 
         # Set widget layout
-        self.setLayout(layoutPtr)
+        self.set_layout(layoutPtr)
 
     def fill_combo_models(self):
         self.combo_models.clear()
@@ -139,7 +139,7 @@ class ResNetActionRecognitionWidget(core.CWorkflowTaskWidget):
     def on_param_changed(self, index):
         self.param_changed = True
 
-    def onApply(self):
+    def on_apply(self):
         # Apply button clicked slot
         # Get parameters from widget
         self.param.sample_duration = self.spin_duration.value()
@@ -150,7 +150,7 @@ class ResNetActionRecognitionWidget(core.CWorkflowTaskWidget):
         self.param.target = self.combo_target.currentData()
 
         # Send signal to launch the process
-        self.emitApply(self.param)
+        self.emit_apply(self.param)
 
 
 # --------------------

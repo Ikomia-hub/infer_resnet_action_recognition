@@ -25,7 +25,7 @@ class ResNetActionRecognitionParam(core.CWorkflowTaskParam):
         self.backend = cv2.dnn.DNN_BACKEND_DEFAULT
         self.target = cv2.dnn.DNN_TARGET_CPU
 
-    def setParamMap(self, param_map):
+    def set_values(self, param_map):
         # Set parameters values from Ikomia application
         # Parameters values are stored as string and accessible like a python dict
         self.rolling = bool(param_map["rolling"])
@@ -36,10 +36,10 @@ class ResNetActionRecognitionParam(core.CWorkflowTaskParam):
         self.target = int(param_map["target"])
         self.model_path = param_map["model_path"]
 
-    def getParamMap(self):
+    def get_values(self):
         # Send parameters values to Ikomia application
         # Create the specific dict structure (string container)
-        param_map = core.ParamMap()
+        param_map = {}
         param_map["rolling"] = str(self.rolling)
         param_map["sample_duration"] = str(self.sample_duration)
         param_map["backend"] = str(self.backend)
@@ -63,9 +63,9 @@ class ResNetActionRecognition(dataprocess.CVideoTask):
 
         # Create parameters class
         if param is None:
-            self.setParam(ResNetActionRecognitionParam())
+            self.set_param_object(ResNetActionRecognitionParam())
         else:
-            self.setParam(copy.deepcopy(param))
+            self.set_param_object(copy.deepcopy(param))
 
         # Load class names
         model_folder = os.path.dirname(os.path.realpath(__file__)) + "/models"
@@ -73,7 +73,7 @@ class ResNetActionRecognition(dataprocess.CVideoTask):
             for row in f:
                 self.class_names.append(row[:-1])
 
-    def getProgressSteps(self):
+    def get_progress_steps(self):
         # Function returning the number of progress steps for this process
         # This is handled by the main progress bar of Ikomia application
         return 1
@@ -89,11 +89,11 @@ class ResNetActionRecognition(dataprocess.CVideoTask):
 
     def run(self):
         # Core function of your process
-        # Call beginTaskRun for initialization
-        self.beginTaskRun()
+        # Call begin_task_run for initialization
+        self.begin_task_run()
 
         # Get parameters :
-        param = self.getParam()
+        param = self.get_param_object()
 
         if self.frames is None:
             if param.rolling:
@@ -105,7 +105,7 @@ class ResNetActionRecognition(dataprocess.CVideoTask):
         if self.net is None or param.update:
             if not os.path.exists(param.model_path):
                 print("Downloading model, please wait...")
-                model_url = utils.getModelHubUrl() + "/" + self.name + "/" + os.path.basename(param.model_path)
+                model_url = utils.get_model_hub_url() + "/" + self.name + "/" + os.path.basename(param.model_path)
                 self.download(model_url, param.model_path)
 
             self.net = cv2.dnn.readNet(param.model_path)
@@ -114,10 +114,10 @@ class ResNetActionRecognition(dataprocess.CVideoTask):
             param.update = False
 
         # Get input :
-        input_img = self.getInput(0)
+        input_img = self.get_input(0)
 
         # Get image from input (numpy array):
-        src_image = input_img.getImage()
+        src_image = input_img.get_image()
         src_image = imutils.resize(src_image, width=400)
         self.frames.append(src_image)
 
@@ -140,22 +140,22 @@ class ResNetActionRecognition(dataprocess.CVideoTask):
                 self.frames = []
 
         # Get output :
-        self.forwardInputImage(0, 0)
-        output_img = self.getOutput(0)
-        dst_image = output_img.getImage()
+        self.forward_input_image(0, 0)
+        output_img = self.get_output(0)
+        dst_image = output_img.get_image()
 
         # draw the predicted activity on the frame
         if self.last_label != "":
             labelSize, baseLine = cv2.getTextSize(self.last_label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
             cv2.rectangle(dst_image, (0, 0), (labelSize[0] + 20, labelSize[1] + 10), (32, 32, 32), cv2.FILLED)
             cv2.putText(dst_image, self.last_label, (10, int((labelSize[1]+10) / 2) + baseLine), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
-            output_img.setImage(dst_image)
+            output_img.set_image(dst_image)
 
         # Step progress bar:
-        self.emitStepProgress()
+        self.emit_step_progress()
 
-        # Call endTaskRun to finalize process
-        self.endTaskRun()
+        # Call end_task_run to finalize process
+        self.end_task_run()
 
 
 # --------------------
@@ -168,7 +168,7 @@ class ResNetActionRecognitionFactory(dataprocess.CTaskFactory):
         dataprocess.CTaskFactory.__init__(self)
         # Set process information as string here
         self.info.name = "infer_resnet_action_recognition"
-        self.info.shortDescription = "Human action recognition with spatio-temporal 3D CNNs."
+        self.info.short_description = "Human action recognition with spatio-temporal 3D CNNs."
         self.info.description = "The purpose of this study is to determine whether current video datasets have sufficient data " \
                                 "for training very deep convolutional neural networks (CNNs) with spatio-temporalthree-dimensional " \
                                 "(3D) kernels. Recently, the performance levels of 3D CNNs in the field of action recognition have " \
@@ -186,14 +186,14 @@ class ResNetActionRecognitionFactory(dataprocess.CTaskFactory):
                                 "models used in this study are publicly available."
         # relative path -> as displayed in Ikomia application process tree
         self.info.path = "Plugins/Python/Classification"
-        self.info.version = "1.1.0"
-        self.info.iconPath = "icon/icon.png"
+        self.info.version = "1.2.0"
+        self.info.icon_path = "icon/icon.png"
         self.info.authors = "Kensho Hara, Hirokatsu Kataoka, Yutaka Satoh"
         self.info.article = "Can Spatiotemporal 3D CNNs Retrace the History of 2D CNNs and ImageNet?"
         self.info.journal = "CVPR"
         self.info.year = 2018
         self.info.license = "MIT License"
-        self.info.documentationLink = "https://www.pyimagesearch.com/2019/11/25/human-activity-recognition-with-opencv-and-deep-learning/"
+        self.info.documentation_link = "https://www.pyimagesearch.com/2019/11/25/human-activity-recognition-with-opencv-and-deep-learning/"
         self.info.repository = "https://github.com/kenshohara/3D-ResNets-PyTorch"
         self.info.keywords = "3D,CNN,detection,activity,classification,kinetics"
 
