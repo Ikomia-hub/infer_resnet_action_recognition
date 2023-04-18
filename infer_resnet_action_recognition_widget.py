@@ -79,7 +79,7 @@ class ResNetActionRecognitionWidget(core.CWorkflowTaskWidget):
         self.combo_models = QComboBox()
         self.fill_combo_models()
         self.combo_models.currentIndexChanged.connect(self.on_param_changed)
-        self.combo_models.setCurrentIndex(self.combo_models.findData(self.param.model_path))
+        self.combo_models.setCurrentIndex(self.combo_models.findData(self.param.model_name_or_path))
 
         # Combobox for inference backend
         label_backend = QLabel("DNN backend")
@@ -144,7 +144,7 @@ class ResNetActionRecognitionWidget(core.CWorkflowTaskWidget):
         # Get parameters from widget
         self.param.sample_duration = self.spin_duration.value()
         self.param.rolling = self.check_rolling.isChecked()
-        self.param.model_path = self.combo_models.currentData()
+        self.param.model_name_or_path = self.combo_models.currentData()
         self.param.update = self.param_changed
         self.param.backend = self.combo_backend.currentData()
         self.param.target = self.combo_target.currentData()
