@@ -20,7 +20,7 @@ class ResNetActionRecognitionParam(core.CWorkflowTaskParam):
         # Place default value initialization here
         self.rolling = True
         self.sample_duration = 16
-        self.model_name_or_path = ""
+        self.model_weight_file = ""
         self.update = False
         self.backend = cv2.dnn.DNN_BACKEND_DEFAULT
         self.target = cv2.dnn.DNN_TARGET_CPU
@@ -30,11 +30,10 @@ class ResNetActionRecognitionParam(core.CWorkflowTaskParam):
         # Parameters values are stored as string and accessible like a python dict
         self.rolling = bool(param_map["rolling"])
         self.sample_duration = int(param_map["sample_duration"])
-        self.model_name_or_path = param_map["model_name_or_path"]
+        self.model_weight_file = param_map["model_weight_file"]
         self.update = True
         self.backend = int(param_map["backend"])
         self.target = int(param_map["target"])
-        self.model_name_or_path = param_map["model_name_or_path"]
 
     def get_values(self):
         # Send parameters values to Ikomia application
@@ -44,7 +43,7 @@ class ResNetActionRecognitionParam(core.CWorkflowTaskParam):
         param_map["sample_duration"] = str(self.sample_duration)
         param_map["backend"] = str(self.backend)
         param_map["target"] = str(self.target)
-        param_map["model_name_or_path"] = self.model_name_or_path
+        param_map["model_weight_file"] = self.model_weight_file
         return param_map
 
 
@@ -103,12 +102,12 @@ class ResNetActionRecognition(dataprocess.CVideoTask):
 
         # Load the recognition model from disk
         if self.net is None or param.update:
-            if not os.path.exists(param.model_name_or_path):
+            if not os.path.exists(param.model_weight_file):
                 print("Downloading model, please wait...")
-                model_url = utils.get_model_hub_url() + "/" + self.name + "/" + os.path.basename(param.model_name_or_path)
-                self.download(model_url, param.model_name_or_path)
+                model_url = utils.get_model_hub_url() + "/" + self.name + "/" + os.path.basename(param.model_weight_file)
+                self.download(model_url, param.model_weight_file)
 
-            self.net = cv2.dnn.readNet(param.model_name_or_path)
+            self.net = cv2.dnn.readNet(param.model_weight_file)
             self.net.setPreferableBackend(param.backend)
             self.net.setPreferableTarget(param.target)
             param.update = False
