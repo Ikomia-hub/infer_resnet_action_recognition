@@ -5,6 +5,7 @@ import cv2
 import imutils
 import numpy as np
 from collections import deque
+import requests
 
 SAMPLE_SIZE = 112
 
@@ -18,9 +19,9 @@ class ResNetActionRecognitionParam(core.CWorkflowTaskParam):
     def __init__(self):
         core.CWorkflowTaskParam.__init__(self)
         # Place default value initialization here
+        self.model_name = 'resnet-34-kinetics'
         self.rolling = True
         self.sample_duration = 16
-        self.model_weight_file = ""
         self.update = False
         self.backend = cv2.dnn.DNN_BACKEND_DEFAULT
         self.target = cv2.dnn.DNN_TARGET_CPU
@@ -28,9 +29,9 @@ class ResNetActionRecognitionParam(core.CWorkflowTaskParam):
     def set_values(self, param_map):
         # Set parameters values from Ikomia application
         # Parameters values are stored as string and accessible like a python dict
+        self.model_name = str(param_map["model_name"])
         self.rolling = bool(param_map["rolling"])
         self.sample_duration = int(param_map["sample_duration"])
-        self.model_weight_file = param_map["model_weight_file"]
         self.update = True
         self.backend = int(param_map["backend"])
         self.target = int(param_map["target"])
@@ -39,11 +40,11 @@ class ResNetActionRecognitionParam(core.CWorkflowTaskParam):
         # Send parameters values to Ikomia application
         # Create the specific dict structure (string container)
         param_map = {}
+        param_map["model_name"] = str(self.model_name)
         param_map["rolling"] = str(self.rolling)
         param_map["sample_duration"] = str(self.sample_duration)
         param_map["backend"] = str(self.backend)
         param_map["target"] = str(self.target)
-        param_map["model_weight_file"] = self.model_weight_file
         return param_map
 
 
@@ -59,6 +60,8 @@ class ResNetActionRecognition(dataprocess.CVideoTask):
         self.last_label = ""
         self.class_names = []
         self.frames = None
+        self.models_folder = os.path.dirname(os.path.realpath(__file__)) + "/models"
+        self.model_path = None
 
         # Create parameters class
         if param is None:
@@ -93,7 +96,6 @@ class ResNetActionRecognition(dataprocess.CVideoTask):
 
         # Get parameters :
         param = self.get_param_object()
-
         if self.frames is None:
             if param.rolling:
                 self.frames = deque(maxlen=param.sample_duration)
@@ -102,12 +104,18 @@ class ResNetActionRecognition(dataprocess.CVideoTask):
 
         # Load the recognition model from disk
         if self.net is None or param.update:
-            if not os.path.exists(param.model_weight_file):
+            self.model_path = self.models_folder + f"/{param.model_name}.onnx"
+            if not os.path.exists(self.model_path):
                 print("Downloading model, please wait...")
-                model_url = utils.get_model_hub_url() + "/" + self.name + "/" + os.path.basename(param.model_weight_file)
-                self.download(model_url, param.model_weight_file)
-
-            self.net = cv2.dnn.readNet(param.model_weight_file)
+                model_url = utils.get_model_hub_url() + f"/{self.name}/{param.model_name}.onnx"
+                # self.download(model_url, param.model_weight_file)
+                response = requests.get(model_url, stream=True)
+                with open(self.model_path, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        f.write(chunk)   
+            # self.net = cv2.dnn.readNet('ResNet34-Kinetics')
+            print(["PAAATH", self.model_path])
+            self.net = cv2.dnn.readNet(self.model_path)
             self.net.setPreferableBackend(param.backend)
             self.net.setPreferableTarget(param.target)
             param.update = False
@@ -185,7 +193,7 @@ class ResNetActionRecognitionFactory(dataprocess.CTaskFactory):
                                 "models used in this study are publicly available."
         # relative path -> as displayed in Ikomia application process tree
         self.info.path = "Plugins/Python/Classification"
-        self.info.version = "1.2.0"
+        self.info.version = "1.3.0"
         self.info.icon_path = "icon/icon.png"
         self.info.authors = "Kensho Hara, Hirokatsu Kataoka, Yutaka Satoh"
         self.info.article = "Can Spatiotemporal 3D CNNs Retrace the History of 2D CNNs and ImageNet?"

@@ -1,5 +1,5 @@
 from ikomia import core, dataprocess
-from ikomia.utils import qtconversion
+from ikomia.utils import pyqtutils, qtconversion
 from infer_resnet_action_recognition.infer_resnet_action_recognition_process import ResNetActionRecognitionParam
 import cv2
 import os
@@ -35,14 +35,6 @@ backend_targets = {
     cv2.dnn.DNN_BACKEND_CUDA: [cv2.dnn.DNN_TARGET_CUDA, cv2.dnn.DNN_TARGET_CUDA_FP16],
 }
 
-_models = {
-    "ResNet34-Kinetics": "resnet-34-kinetics.onnx",
-    "ResNet50-Kinetics": "resnet-50-kinetics.onnx",
-    "ResNet101-Kinetics": "resnet-101-kinetics.onnx",
-    "ResNext101-Kinetics": "resnext-101-kinetics.onnx",
-    "WideResNet50-Kinetics": "wideresnet-50-kinetics.onnx",
-}
-
 
 # --------------------
 # - Class which implements widget associated with the process
@@ -74,12 +66,6 @@ class ResNetActionRecognitionWidget(core.CWorkflowTaskWidget):
         self.check_rolling = QCheckBox("Rolling prediction")
         self.check_rolling.setChecked(self.param.rolling)
 
-        # Combobox for models
-        label_model = QLabel("Model")
-        self.combo_models = QComboBox()
-        self.fill_combo_models()
-        self.combo_models.currentIndexChanged.connect(self.on_param_changed)
-        self.combo_models.setCurrentIndex(self.combo_models.findData(self.param.model_weight_file))
 
         # Combobox for inference backend
         label_backend = QLabel("DNN backend")
@@ -100,11 +86,20 @@ class ResNetActionRecognitionWidget(core.CWorkflowTaskWidget):
         self.grid_layout.addWidget(self.combo_backend, 0, 1, 1, 1)
         self.grid_layout.addWidget(label_target, 1, 0, 1, 1)
         self.grid_layout.addWidget(self.combo_target, 1, 1, 1, 1)
-        self.grid_layout.addWidget(label_model, 2, 0, 1, 1)
-        self.grid_layout.addWidget(self.combo_models, 2, 1, 1, 1)
+        # self.grid_layout.addWidget(label_model, 2, 0, 1, 1)
+        # self.grid_layout.addWidget(self.combo_models, 2, 1, 1, 1)
         self.grid_layout.addWidget(label_duration, 3, 0, 1, 1)
         self.grid_layout.addWidget(self.spin_duration, 3, 1, 1, 1)
         self.grid_layout.addWidget(self.check_rolling, 4, 0, 1, 2)
+
+        # Combobox for models
+        self.combo_models = pyqtutils.append_combo(self.grid_layout, "Model")
+        self.combo_models.addItem("resnet-34-kinetics")
+        self.combo_models.addItem("resnet-50-kinetics")
+        self.combo_models.addItem("resnet-101-kinetics")
+        self.combo_models.addItem("resnext-101-kinetics.onnx")
+        self.combo_models.addItem("wideresnet-50-kinetics.onnx")
+        self.combo_models.setCurrentText(self.param.model_name)
 
         # PyQt -> Qt wrapping
         layoutPtr = qtconversion.PyQtToQt(self.grid_layout)
@@ -112,12 +107,6 @@ class ResNetActionRecognitionWidget(core.CWorkflowTaskWidget):
         # Set widget layout
         self.set_layout(layoutPtr)
 
-    def fill_combo_models(self):
-        self.combo_models.clear()
-        models_folder = os.path.dirname(os.path.realpath(__file__)) + "/models"
-
-        for model_name in _models:
-            self.combo_models.addItem(model_name, os.path.join(models_folder, _models[model_name]))
 
     def fill_combo_backend(self):
         self.combo_backend.clear()
@@ -134,17 +123,18 @@ class ResNetActionRecognitionWidget(core.CWorkflowTaskWidget):
     def on_backend_changed(self, index):
         backend = self.combo_backend.currentData()
         self.fill_combo_target(backend)
-        self.param_changed = True
+        self.param.update = True
 
     def on_param_changed(self, index):
-        self.param_changed = True
+        self.param.update = True
 
     def on_apply(self):
         # Apply button clicked slot
         # Get parameters from widget
+        self.param.update = True
         self.param.sample_duration = self.spin_duration.value()
         self.param.rolling = self.check_rolling.isChecked()
-        self.param.model_weight_file = self.combo_models.currentData()
+        self.param.model_name = self.combo_models.currentText()
         self.param.update = self.param_changed
         self.param.backend = self.combo_backend.currentData()
         self.param.target = self.combo_target.currentData()
