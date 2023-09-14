@@ -19,10 +19,10 @@
     </a> 
 </p>
 
-The purpose of this study is to determine whether current video datasets have sufficient data for training very deep convolutional neural networks (CNNs) with spatio-temporalthree-dimensional (3D) kernels. Recently, the performance levels of 3D CNNs in the field of action recognition have improved significantly. However, to date, conventional research has only explored relatively shallow  3D architectures. We examine the architectures of various 3D CNNs from relatively shallow to very deep ones on current video datasets. Based on the results of those experiments, the following conclusions could be obtained: (i) ResNet-18 training resulted in significant overfitting for UCF-101, HMDB-51, and ActivityNet but not for Kinetics. (ii) The Kinetics dataset has sufficient data for training of deep 3D CNNs, and enables training of up to 152 ResNets layers, interestingly similar to 2D ResNets on ImageNet. ResNeXt-101 achieved 78.4% average accuracy on the Kinetics test set. (iii) Kinetics pre-trained simple 3D architectures outperforms complex 2D architectures, and the pretrained ResNeXt-101 achieved 94.5% and 70.2% on UCF-101 and HMDB-51, respectively. The use of 2D CNNs trained on ImageNet has produced significant progress in various tasks in image. We believe that using deep 3D CNNs together with Kinetics will retrace the successful history of 2D CNNs and ImageNet, and stimulate advances in computer vision for videos. The codes and pretrained models used in this study are publicly available.
 
-[Insert illustrative image here. Image must be accessible publicly, in algorithm Github repository for example.
-<img src="images/illustration.png"  alt="Illustrative image" width="30%" height="30%">]
+Run ResNets on videos for action recognition.
+
+![Kinetics illustration](https://production-media.paperswithcode.com/datasets/kinetics.jpg)
 
 ## :rocket: Use with Ikomia API
 
@@ -36,20 +36,46 @@ pip install ikomia
 
 #### 2. Create your workflow
 
-[Change the sample image URL to fit algorithm purpose]
 
 ```python
-import ikomia
 from ikomia.dataprocess.workflow import Workflow
+import cv2
 
 # Init your workflow
 wf = Workflow()
 
-# Add algorithm
-algo = wf.add_task(name="infer_resnet_action_recognition", auto_connect=True)
+# Add object detection algorithm
+detector = wf.add_task(name="infer_resnet_action_recognition", auto_connect=True)
 
-# Run on your image  
-wf.run_on(url="example_image.png")
+stream = cv2.VideoCapture(0)
+while True:
+    # Read image from stream
+    ret, frame = stream.read()
+
+    # Test if streaming is OK
+    if not ret:
+        continue
+
+    # Run the workflow on current frame
+    wf.run_on(array=frame)
+
+    # Get results
+    image_out = detector.get_output(0)
+
+    # Convert color space
+    img_res = cv2.cvtColor(image_out, cv2.COLOR_BGR2RGB)
+
+    # Display using OpenCV
+    cv2.imshow("Action recognition", img_res)
+
+    # Press 'q' to quit the streaming process
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# After the loop release the stream object
+stream.release()
+# Destroy all windows
+cv2.destroyAllWindows()
 ```
 
 ## :sunny: Use with Ikomia Studio
@@ -62,56 +88,71 @@ Ikomia Studio offers a friendly UI with the same features as the API.
 
 ## :pencil: Set algorithm parameters
 
-[Explain each algorithm parameters]
+- **model_name** (str) - default 'resnet-18-kinetics': Name of the pre-trained model. Additional ResNet size are available: 
+    - resnet-34-kinetics
+    - resnet-50-kinetics
+    - resnet-101-kinetics
+    - resnext-101-kinetics.onnx
+    - wideresnet-50-kinetics.onnx
 
-[Change the sample image URL to fit algorithm purpose]
+- **rolling** (bool) - default 'True': Number of frame passed has input. 
+- **sample_duration** (int) - default '16': Number of frame passed as input. 
+
+If rolling frame prediction is **used**, we perform N classifications, one for each frame (once the deque data structure is filled, of course)
+If rolling frame prediction is **not used**, we only have to perform N / SAMPLE_DURATION classifications, thus reducing the amount of time it takes to process a video stream significantly.
+
+
+**Parameters** should be in **strings format**  when added to the dictionary.
+
 
 ```python
-import ikomia
 from ikomia.dataprocess.workflow import Workflow
+import cv2
 
 # Init your workflow
 wf = Workflow()
 
-# Add algorithm
-algo = wf.add_task(name="infer_resnet_action_recognition", auto_connect=True)
-
-algo.set_parameters({
-    "param1": "value1",
-    "param2": "value2",
-    ...
+# Add object detection algorithm
+detector = wf.add_task(name="infer_resnet_action_recognition", auto_connect=True)
+detector.set_parameters({
+    "model_name": "resnet-34-kinetics",
+    "rolling": "False",
+    "sample_duration": "16"
 })
 
-# Run on your image  
-wf.run_on(url="example_image.png")
+stream = cv2.VideoCapture(0)
+while True:
+    # Read image from stream
+    ret, frame = stream.read()
 
+    # Test if streaming is OK
+    if not ret:
+        continue
+
+    # Run the workflow on current frame
+    wf.run_on(array=frame)
+
+    # Get results
+    image_out = detector.get_output(0)
+
+    # Convert color space
+    img_res = cv2.cvtColor(image_out, cv2.COLOR_BGR2RGB)
+
+    # Display using OpenCV
+    cv2.imshow("Action recognition", img_res)
+
+    # Press 'q' to quit the streaming process
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# After the loop release the stream object
+stream.release()
+# Destroy all windows
+cv2.destroyAllWindows()
 ```
 
-## :mag: Explore algorithm outputs
 
-Every algorithm produces specific outputs, yet they can be explored them the same way using the Ikomia API. For a more in-depth understanding of managing algorithm outputs, please refer to the [documentation](https://ikomia-dev.github.io/python-api-documentation/advanced_guide/IO_management.html).
-
-```python
-import ikomia
-from ikomia.dataprocess.workflow import Workflow
-
-# Init your workflow
-wf = Workflow()
-
-# Add algorithm
-algo = wf.add_task(name="infer_resnet_action_recognition", auto_connect=True)
-
-# Run on your image  
-wf.run_on(url="example_image.png")
-
-# Iterate over outputs
-for output in algo.get_outputs()
-    # Print information
-    print(output)
-    # Export it to JSON
-    output.to_json()
-```
 
 ## :fast_forward: Advanced usage 
 
-[optional]
+
