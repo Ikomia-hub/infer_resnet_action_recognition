@@ -112,9 +112,7 @@ class ResNetActionRecognition(dataprocess.CVideoTask):
                 response = requests.get(model_url, stream=True)
                 with open(self.model_path, 'wb') as f:
                     for chunk in response.iter_content(chunk_size=8192):
-                        f.write(chunk)   
-            # self.net = cv2.dnn.readNet('ResNet34-Kinetics')
-            print(["PAAATH", self.model_path])
+                        f.write(chunk)
             self.net = cv2.dnn.readNet(self.model_path)
             self.net.setPreferableBackend(param.backend)
             self.net.setPreferableTarget(param.target)
