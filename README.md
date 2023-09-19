@@ -38,6 +38,9 @@ pip install ikomia
 
 
 ```python
+from ikomia.utils.displayIO import display
+from ikomia.core import IODataType
+from ikomia.dataprocess import CImageIO
 from ikomia.dataprocess.workflow import Workflow
 import cv2
 
@@ -57,16 +60,20 @@ while True:
         continue
 
     # Run the workflow on current frame
-    wf.run_on(array=frame)
+    # We don't run at workflow level as action recognition algorithm need to accumulate frames
+    # and frame stack is cleared when a workflow is started 
+    detector.set_input(CImageIO(IODataType.IMAGE, frame), 0)
+    detector.run()
 
     # Get results
     image_out = detector.get_output(0)
+    graphics_out = detector.get_output(1)
 
     # Convert color space
-    img_res = cv2.cvtColor(image_out, cv2.COLOR_BGR2RGB)
+    img_res = cv2.cvtColor(image_out.get_image_with_graphics(graphics_out), cv2.COLOR_BGR2RGB)
 
     # Display using OpenCV
-    cv2.imshow("Action recognition", img_res)
+    display(img_res, title="Action recognition", viewer="opencv")
 
     # Press 'q' to quit the streaming process
     if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -106,6 +113,9 @@ If rolling frame prediction is **not used**, we only have to perform N / SAMPLE_
 
 
 ```python
+from ikomia.utils.displayIO import display
+from ikomia.core import IODataType
+from ikomia.dataprocess import CImageIO
 from ikomia.dataprocess.workflow import Workflow
 import cv2
 
@@ -130,16 +140,20 @@ while True:
         continue
 
     # Run the workflow on current frame
-    wf.run_on(array=frame)
+    # We don't run at workflow level as action recognition algorithm need to accumulate frames
+    # and frame stack is cleared when a workflow is started 
+    detector.set_input(CImageIO(IODataType.IMAGE, frame), 0)
+    detector.run()
 
     # Get results
     image_out = detector.get_output(0)
+    graphics_out = detector.get_output(1)
 
     # Convert color space
-    img_res = cv2.cvtColor(image_out, cv2.COLOR_BGR2RGB)
+    img_res = cv2.cvtColor(image_out.get_image_with_graphics(graphics_out), cv2.COLOR_BGR2RGB)
 
     # Display using OpenCV
-    cv2.imshow("Action recognition", img_res)
+    display(img_res, title="Action recognition", viewer="opencv")
 
     # Press 'q' to quit the streaming process
     if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -150,9 +164,3 @@ stream.release()
 # Destroy all windows
 cv2.destroyAllWindows()
 ```
-
-
-
-## :fast_forward: Advanced usage 
-
-
