@@ -180,7 +180,8 @@ class ResNetActionRecognitionFactory(dataprocess.CTaskFactory):
         self.info.year = 2018
         self.info.license = "MIT License"
         self.info.documentation_link = "https://www.pyimagesearch.com/2019/11/25/human-activity-recognition-with-opencv-and-deep-learning/"
-        self.info.repository = "https://github.com/kenshohara/3D-ResNets-PyTorch"
+        self.info.repository = "https://github.com/Ikomia-hub/infer_resnet_action_recognition"
+        self.info.original_repository = "https://github.com/kenshohara/3D-ResNets-PyTorch"
         self.info.keywords = "3D,CNN,detection,activity,classification,kinetics"
 
     def create(self, param=None):
