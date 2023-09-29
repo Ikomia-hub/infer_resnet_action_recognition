@@ -183,6 +183,8 @@ class ResNetActionRecognitionFactory(dataprocess.CTaskFactory):
         self.info.repository = "https://github.com/Ikomia-hub/infer_resnet_action_recognition"
         self.info.original_repository = "https://github.com/kenshohara/3D-ResNets-PyTorch"
         self.info.keywords = "3D,CNN,detection,activity,classification,kinetics"
+        self.info.algo_type = core.AlgoType.INFER
+        self.info.algo_tasks = "CLASSIFICATION"
 
     def create(self, param=None):
         # Create process object
